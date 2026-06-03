@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>질문탐구노트_질문씨앗팀🌱</title>
+    <style>
+        :root { --main-green: #2ecc71; --soft-bg: #f9fbf9; }
+        body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--soft-bg); margin: 0; overflow-x: hidden; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; text-align: center; }
+        
+        button { background: var(--main-green); color: white; border: none; padding: 15px 30px; border-radius: 30px; cursor: pointer; font-size: 18px; font-weight: bold; transition: 0.3s; }
+        button:hover:not(:disabled) { transform: scale(1.05); background: #27ae60; }
+        button:disabled { background: #bdc3c7; cursor: not-allowed; }
+        
+        .secondary-btn { background: #34495e; font-size: 16px; padding: 10px 20px; }
+        .secondary-btn:hover { background: #2c3e50; }
+        .outline-btn { background: white; color: #34495e; border: 2px solid #34495e; margin-top: 15px; width: 100%; max-width: 300px; box-sizing: border-box; }
+        .outline-btn:hover { background: #f1f2f6; transform: scale(1.02); }
+
+        .step { display: none; }
+        .step.active { display: block; animation: fadeIn 0.8s ease forwards; }
+
+        .input-group { display: flex; gap: 10px; justify-content: center; margin: 30px 0; }
+        select { padding: 12px; border-radius: 10px; border: 2px solid #ddd; font-size: 16px; flex: 1; max-width: 150px; }
+
+        .form-box { background: white; padding: 30px; border-radius: 20px; text-align: left; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+        input[type="text"], textarea { width: 100%; padding: 15px; margin: 10px 0 20px; border: 1px solid #eee; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
+        textarea { height: 150px; }
+
+        .board-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+        .board-header p { color: #7f8c8d; font-size: 14px; margin: 0; }
+
+        .board { display: flex; gap: 20px; overflow: hidden; margin-top: 15px; position: relative; border-radius: 15px; background: rgba(255,255,255,0.5); padding: 10px; transition: height 0.3s; }
+        .column { flex: 1; display: flex; flex-direction: column; gap: 20px; }
+        
+        /* 질문 카드 & 싹추 배지 디자인 */
+        .card { background: white; padding: 25px 20px; border-radius: 15px; border: 1px solid #e0f2f1; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.03); word-break: break-all; position: relative; }
+        .card:hover { border-color: var(--main-green); transform: translateY(-3px) scale(1.02); box-shadow: 0 8px 20px rgba(46, 204, 113, 0.2); }
+        .card .title { font-weight: bold; color: #2c3e50; font-size: 16px; text-align: center; line-height: 1.4; margin-bottom: 15px; }
+        .like-badge { display: inline-block; background: #e8f8f5; color: #1abc9c; padding: 5px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; }
+        
+        .empty-msg { width: 100%; padding: 50px; color: #7f8c8d; font-weight: bold; text-align: center; }
+
+        /* 로딩 화면 */
+        #loading { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 9999; flex-direction: column; justify-content: center; align-items: center; }
+        .seed-loader { font-size: 60px; animation: breath 1.5s ease-in-out infinite; margin-bottom: 15px; }
+        #loading p { color: #2c3e50; font-weight: bold; font-size: 16px; margin: 0; }
+
+        /* 모달 팝업 */
+        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 100; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; }
+        #modal.show { opacity: 1; }
+        
+        .modal-content { background: white; padding: 40px; border-radius: 20px; max-width: 500px; width: 90%; position: relative; text-align: left; transform: scale(0.5); opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 20px 40px rgba(0,0,0,0.2); box-sizing: border-box; }
+        #modal.show .modal-content { transform: scale(1); opacity: 1; }
+        
+        .close-btn { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 28px; color: #95a5a6; transition: 0.2s; }
+        .close-btn:hover { color: #e74c3c; transform: rotate(90deg); }
+        
+        /* 모달 안의 싹추 버튼 */
+        .modal-like-btn { width: 100%; background: #f39c12; margin-top: 25px; }
+        .modal-like-btn:hover:not(:disabled) { background: #e67e22; }
+
+        @keyframes floatUpUniform { 0% { transform: translateY(0); } 100% { transform: translateY(-50%); } }
+        @keyframes floatDownUniform { 0% { transform: translateY(-50%); } 100% { transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes breath { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.3); } }
+
+        @media (max-width: 768px) {
+            .board { flex-direction: column; height: auto !important; overflow-y: visible; padding: 10px 0; }
+            .column { animation: none !important; width: 100%; }
+            .input-group { flex-wrap: wrap; }
+            select { max-width: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="loading">
+    <div class="seed-loader">🌱</div>
+    <p>질문 정원을 불러오는 중...</p>
+</div>
+
+<div class="container">
+    <h1 style="color: #2c3e50;">🌱 질문탐구노트_질문씨앗팀</h1>
+
+    <div id="step1" class="step active">
+        <h3>반갑습니다! 누구신가요?</h3>
+        <p style="color:#7f8c8d; font-size:14px; margin-top:-5px;">(학번은 중복 싹추 방지를 위해 수집되나, 게시판에는 익명 처리됩니다)</p>
+        <div class="input-group">
+            <select id="grade"><option value="">학년</option><script>for(let i=1;i<=3;i++) document.write(`<option value="${i}">${i}학년</option>`)</script></select>
+            <select id="class"><option value="">반</option><script>for(let i=1;i<=12;i++) document.write(`<option value="${i}">${i}반</option>`)</script></select>
+            <select id="num"><option value="">번호</option><script>for(let i=1;i<=30;i++) document.write(`<option value="${i}">${i}번</option>`)</script></select>
+        </div>
+        <button onclick="nextStep(2)">질문 씨앗 심기</button>
+        <br>
+        <button class="outline-btn" onclick="skipToBoard()">다른 친구들의 질문 보기</button>
+    </div>
+
+    <div id="step2" class="step">
+        <div class="form-box">
+            <label style="font-weight: bold; color: #2c3e50;">큰 주제 (질문 제목)</label>
+            <input type="text" id="qTitle" placeholder="연구하고 싶은 핵심 질문을 적어주세요.">
+            <label style="font-weight: bold; color: #2c3e50;">상세 내용</label>
+            <textarea id="qContent" placeholder="질문에 대한 구체적인 배경이나 궁금한 점을 적어주세요."></textarea>
+            <button onclick="submitQuestion()" style="width: 100%;">질문 제출하기</button>
+        </div>
+    </div>
+
+    <div id="step3" class="step">
+        <h3>우리 팀의 질문 정원</h3>
+        <div class="board-header">
+            <p id="countInfo"></p>
+            <button id="toggleBtn" class="secondary-btn" onclick="toggleMyMode()">내 질문만 보기</button>
+        </div>
+        
+        <div class="board" id="board">
+            <div class="column" id="col1"></div>
+            <div class="column" id="col2"></div>
+            <div class="column" id="col3"></div>
+        </div>
+        <button onclick="nextStep(1)" style="margin-top: 30px; background: #95a5a6;">새 질문하기</button>
+    </div>
+</div>
+
+<div id="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal()">✖</span>
+        <h2 id="modalTitle" style="margin-top: 10px; color: #2ecc71;"></h2>
+        <hr style="border: 0; height: 1px; background: #eee; margin: 20px 0;">
+        <p id="modalBody" style="line-height: 1.6; color: #444; white-space: pre-wrap; font-size: 16px;"></p>
+        
+        <button id="modalLikeBtn" class="modal-like-btn" onclick="addLike()">🌱 싹추하기 (0)</button>
+    </div>
+</div>
+
+<script>
+    // 새로운 백엔드 주소 적용!
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzEucaAFr7mnhbE4lVl0ONyfUCP3NLGtRYHBm9V557SM7HqvIcLNiqtU_i-fy3Ys0oKbg/exec"; 
+    
+    let myInfo = {};
+    let allQuestions = []; 
+    let isMyMode = false; 
+    let currentQuestion = null; // 현재 열려있는 모달의 질문 데이터 임시 저장
+
+    function skipToBoard() {
+        myInfo = {}; 
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.getElementById('step3').classList.add('active');
+        fetchQuestions();
+    }
+
+    function nextStep(n) {
+        if(n === 2) {
+            myInfo = { grade: document.getElementById('grade').value, class: document.getElementById('class').value, num: document.getElementById('num').value };
+            if(!myInfo.grade || !myInfo.class || !myInfo.num) return alert("정보를 모두 선택해주세요!");
+        }
+        if(n === 1) {
+            document.getElementById('grade').value = "";
+            document.getElementById('class').value = "";
+            document.getElementById('num').value = "";
+            myInfo = {};
+        }
+
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.getElementById('step' + n).classList.add('active');
+        if(n === 3) fetchQuestions();
+    }
+
+    // 1. 질문 제출하기 (action: "addQuestion" 추가)
+    async function submitQuestion() {
+        const title = document.getElementById('qTitle').value;
+        const content = document.getElementById('qContent').value;
+        if(!title || !content) return alert("내용을 입력해주세요!");
+
+        const btn = document.querySelector('#step2 button');
+        btn.innerText = "심는 중...";
+        btn.disabled = true;
+
+        try {
+            await fetch(SCRIPT_URL, {
+                method: 'POST',
+                // 백엔드 요청에 맞게 action 파라미터 추가
+                body: JSON.stringify({ action: "addQuestion", ...myInfo, title, content })
+            });
+            document.getElementById('qTitle').value = "";
+            document.getElementById('qContent').value = "";
+            isMyMode = false; 
+            document.getElementById('toggleBtn').innerText = "내 질문만 보기";
+            
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.getElementById('step3').classList.add('active');
+            fetchQuestions();
+
+        } catch(e) {
+            alert("저장에 실패했습니다. 다시 시도해주세요.");
+        } finally {
+            btn.innerText = "질문 제출하기";
+            btn.disabled = false;
+        }
+    }
+
+    function createCard(q) {
+        const card = document.createElement('div');
+        card.className = 'card';
+        // 카드 내부에 제목과 싹추 개수 배지 표시
+        card.innerHTML = `
+            <div class="title">${q.title}</div>
+            <div class="like-badge">🌱 ${q.likes}</div>
+        `;
+        card.onclick = () => openModal(q);
+        return card;
+    }
+
+    async function fetchQuestions() {
+        const loading = document.getElementById('loading');
+        loading.style.display = 'flex'; 
+        
+        try {
+            const res = await fetch(SCRIPT_URL);
+            allQuestions = await res.json();
+            // 최신 글이 위로 오게 하고 싶다면 역순 정렬 (원치 않으시면 지워도 됩니다)
+            allQuestions.reverse(); 
+            renderBoard();
+        } catch(e) {
+            console.error("데이터 로딩 실패:", e);
+        } finally {
+            setTimeout(() => loading.style.display = 'none', 300);
+        }
+    }
+
+    function toggleMyMode() {
+        if(!myInfo.grade || !myInfo.class || !myInfo.num) {
+            alert("첫 화면에서 학번을 선택하지 않아 '내 질문'을 찾을 수 없습니다. '새 질문하기' 버튼을 눌러주세요.");
+            return;
+        }
+        isMyMode = !isMyMode;
+        const btn = document.getElementById('toggleBtn');
+        btn.innerText = isMyMode ? "전체 정원 보기" : "내 질문만 보기";
+        renderBoard();
+    }
+
+    function renderBoard() {
+        const isMobile = window.innerWidth <= 768; 
+        const cols = [document.getElementById('col1'), document.getElementById('col2'), document.getElementById('col3')];
+        const board = document.getElementById('board');
+        
+        cols.forEach(c => { c.innerHTML = ""; c.style.animation = ""; });
+        board.style.height = 'auto';
+
+        let displayData = allQuestions;
+        if (isMyMode) {
+            displayData = allQuestions.filter(q => 
+                q.grade == myInfo.grade && q.class == myInfo.class && q.num == myInfo.num
+            );
+        }
+
+        document.getElementById('countInfo').innerText = isMyMode 
+            ? `내가 심은 질문: ${displayData.length}개` 
+            : `익명으로 올라온 질문: ${displayData.length}개`;
+
+        if (displayData.length === 0) {
+            cols[1].innerHTML = `<div class="empty-msg">조건에 맞는 질문 씨앗이 아직 없습니다.</div>`;
+            return;
+        }
+
+        const colData = [[], [], []];
+        displayData.forEach((q, i) => colData[i % 3].push(q));
+
+        const shouldLoop = (!isMobile && !isMyMode && displayData.length >= 9);
+
+        cols.forEach((col, idx) => {
+            colData[idx].forEach(q => col.appendChild(createCard(q)));
+        });
+
+        setTimeout(() => {
+            if (shouldLoop) {
+                const minHeight = document.getElementById('col3').offsetHeight;
+                board.style.height = minHeight + "px"; 
+
+                cols.forEach((col, idx) => {
+                    colData[idx].forEach(q => col.appendChild(createCard(q)));
+                    const fullHeight = col.offsetHeight;
+                    const duration = fullHeight / 40; 
+                    if (idx === 1) col.style.animation = `floatDownUniform ${duration}s linear infinite`;
+                    else col.style.animation = `floatUpUniform ${duration}s linear infinite`;
+                });
+            } else {
+                board.style.height = 'auto'; 
+            }
+        }, 50);
+    }
+
+    // 모달창 띄우기
+    function openModal(q) {
+        currentQuestion = q; // 현재 선택된 질문 저장 (좋아요 기능에서 사용)
+        document.getElementById('modalTitle').innerText = q.title;
+        document.getElementById('modalBody').innerText = q.content;
+        
+        const likeBtn = document.getElementById('modalLikeBtn');
+        likeBtn.innerText = `🌱 싹추하기 (${q.likes})`;
+        
+        const modal = document.getElementById('modal');
+        modal.style.display = 'flex';
+        setTimeout(() => modal.classList.add('show'), 10); 
+    }
+
+    function closeModal() { 
+        const modal = document.getElementById('modal');
+        modal.classList.remove('show');
+        setTimeout(() => modal.style.display = 'none', 400); 
+    }
+
+    // 2. 싹추(좋아요) 기능 추가 (action: "addLike")
+    async function addLike() {
+        // 학번 없이 들어온 익명 유저 방어
+        if(!myInfo.grade || !myInfo.class || !myInfo.num) {
+            alert("싹추를 주려면 학번 정보가 필요합니다! 🌱\n아래 '새 질문하기' 버튼을 눌러 학번을 등록해주세요.");
+            return;
+        }
+
+        const btn = document.getElementById('modalLikeBtn');
+        btn.innerText = "🌱 물 주는 중...";
+        btn.disabled = true;
+
+        try {
+            const res = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({ 
+                    action: "addLike", 
+                    questionId: currentQuestion.id,
+                    userGrade: myInfo.grade,
+                    userClass: myInfo.class,
+                    userNum: myInfo.num
+                })
+            });
+            
+            const result = await res.text();
+            
+            if (result === "Already Liked") {
+                alert("이미 이 질문에 싹추를 주셨습니다! 😅");
+            } else if (result === "Like Success") {
+                // 성공 시 화면의 숫자를 1 올리고 다시 렌더링
+                currentQuestion.likes = Number(currentQuestion.likes) + 1;
+                btn.innerText = `🌱 싹추하기 (${currentQuestion.likes})`;
+                renderBoard(); // 뒤 배경의 카드 싹추 숫자도 업데이트 되도록 새로고침
+                alert("싹추 성공! 질문이 무럭무럭 자랄 거예요 🌱");
+            } else {
+                alert("알 수 없는 오류가 발생했습니다.");
+            }
+        } catch(e) {
+            alert("서버 연결에 실패했습니다.");
+        } finally {
+            btn.disabled = false;
+            btn.innerText = `🌱 싹추하기 (${currentQuestion.likes})`;
+        }
+    }
+</script>
+</body>
+</html>
