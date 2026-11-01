@@ -5,356 +5,623 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>질문탐구노트_질문씨앗팀🌱</title>
     <style>
-        :root { --main-green: #2ecc71; --soft-bg: #f9fbf9; }
-        body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--soft-bg); margin: 0; overflow-x: hidden; }
-        .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; text-align: center; }
+        :root { --main-green: #2ecc71; --dark-green: #27ae60; --soft-bg: #f9fbf9; }
+        body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--soft-bg); margin: 0; padding: 0; overflow-x: hidden; color: #2c3e50; }
+        .container { max-width: 1050px; margin: 0 auto; padding: 40px 20px 80px 20px; text-align: center; }
         
-        button { background: var(--main-green); color: white; border: none; padding: 15px 30px; border-radius: 30px; cursor: pointer; font-size: 18px; font-weight: bold; transition: 0.3s; }
-        button:hover:not(:disabled) { transform: scale(1.05); background: #27ae60; }
-        button:disabled { background: #bdc3c7; cursor: not-allowed; }
+        /* 시작 화면 */
+        .intro-box { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); display: inline-block; max-width: 90%; }
+        select, input, textarea { padding: 12px; margin: 8px 4px; border-radius: 10px; border: 1px solid #ddd; font-size: 16px; outline: none; font-family: inherit; }
+        textarea { width: 100%; max-width: 500px; height: 150px; resize: vertical; box-sizing: border-box; }
         
-        .secondary-btn { background: #34495e; font-size: 16px; padding: 10px 20px; }
-        .secondary-btn:hover { background: #2c3e50; }
-        .outline-btn { background: white; color: #34495e; border: 2px solid #34495e; margin-top: 15px; width: 100%; max-width: 300px; box-sizing: border-box; }
-        .outline-btn:hover { background: #f1f2f6; transform: scale(1.02); }
-
-        .step { display: none; }
-        .step.active { display: block; animation: fadeIn 0.8s ease forwards; }
-
-        .input-group { display: flex; gap: 10px; justify-content: center; margin: 30px 0; }
-        select { padding: 12px; border-radius: 10px; border: 2px solid #ddd; font-size: 16px; flex: 1; max-width: 150px; }
-
-        .form-box { background: white; padding: 30px; border-radius: 20px; text-align: left; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
-        input[type="text"], textarea { width: 100%; padding: 15px; margin: 10px 0 20px; border: 1px solid #eee; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
-        textarea { height: 150px; }
-
-        .board-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
-        .board-header p { color: #7f8c8d; font-size: 14px; margin: 0; }
-
-        .board { display: flex; gap: 20px; overflow: hidden; margin-top: 15px; position: relative; border-radius: 15px; background: rgba(255,255,255,0.5); padding: 10px; transition: height 0.3s; }
-        .column { flex: 1; display: flex; flex-direction: column; gap: 20px; }
+        button, .link-btn { background: var(--main-green); color: white; border: none; padding: 13px 26px; border-radius: 30px; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.25s; margin: 6px; text-decoration: none; display: inline-block; }
+        button:hover:not(:disabled), .link-btn:hover { transform: translateY(-2px); background: var(--dark-green); }
+        button:disabled { background: #bdc3c7; cursor: not-allowed; transform: none; }
         
-        /* 질문 카드 & 싹추 배지 디자인 */
-        .card { background: white; padding: 25px 20px; border-radius: 15px; border: 1px solid #e0f2f1; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.03); word-break: break-all; position: relative; }
-        .card:hover { border-color: var(--main-green); transform: translateY(-3px) scale(1.02); box-shadow: 0 8px 20px rgba(46, 204, 113, 0.2); }
-        .card .title { font-weight: bold; color: #2c3e50; font-size: 16px; text-align: center; line-height: 1.4; margin-bottom: 15px; }
-        .like-badge { display: inline-block; background: #e8f8f5; color: #1abc9c; padding: 5px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; }
-        
-        .empty-msg { width: 100%; padding: 50px; color: #7f8c8d; font-weight: bold; text-align: center; }
+        .secondary-btn { background: white; color: var(--main-green); border: 2px solid var(--main-green); }
+        .secondary-btn:hover:not(:disabled) { background: #f0fdf4; color: var(--dark-green); }
+        .small-btn { padding: 8px 16px; font-size: 14px; margin: 3px; }
 
-        /* 로딩 화면 */
-        #loading { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 9999; flex-direction: column; justify-content: center; align-items: center; }
-        .seed-loader { font-size: 60px; animation: breath 1.5s ease-in-out infinite; margin-bottom: 15px; }
-        #loading p { color: #2c3e50; font-weight: bold; font-size: 16px; margin: 0; }
+        /* 문의사항 링크 버튼 스타일 */
+        .inquiry-btn { background: #eef7ff; color: #2980b9; border: 1.5px solid #bde0fe; }
+        .inquiry-btn:hover { background: #d8ecff; color: #1c638d; }
+        .floating-inquiry { position: fixed; bottom: 20px; right: 20px; background: white; color: #2c3e50; border: 2px solid var(--main-green); padding: 10px 18px; border-radius: 30px; font-size: 14px; font-weight: bold; text-decoration: none; box-shadow: 0 6px 20px rgba(0,0,0,0.1); transition: 0.25s; z-index: 900; }
+        .floating-inquiry:hover { background: var(--main-green); color: white; transform: translateY(-3px); }
 
-        /* 모달 팝업 */
-        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 100; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; }
-        #modal.show { opacity: 1; }
-        
-        .modal-content { background: white; padding: 40px; border-radius: 20px; max-width: 500px; width: 90%; position: relative; text-align: left; transform: scale(0.5); opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 20px 40px rgba(0,0,0,0.2); box-sizing: border-box; }
-        #modal.show .modal-content { transform: scale(1); opacity: 1; }
-        
-        .close-btn { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 28px; color: #95a5a6; transition: 0.2s; }
-        .close-btn:hover { color: #e74c3c; transform: rotate(90deg); }
-        
-        /* 모달 안의 싹추 버튼 */
-        .modal-like-btn { width: 100%; background: #f39c12; margin-top: 25px; }
-        .modal-like-btn:hover:not(:disabled) { background: #e67e22; }
+        /* 상단 유저 상태바 & 시즌 탭 */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; background: white; padding: 12px 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 20px; }
+        .user-badge { font-size: 14px; font-weight: bold; color: #555; }
+        .season-tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .tab-btn { background: #e8f5e9; color: #2e7d32; border: 2px solid transparent; padding: 10px 22px; border-radius: 25px; font-size: 15px; }
+        .tab-btn.active { background: var(--main-green); color: white; box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3); }
 
-        @keyframes floatUpUniform { 0% { transform: translateY(0); } 100% { transform: translateY(-50%); } }
-        @keyframes floatDownUniform { 0% { transform: translateY(-50%); } 100% { transform: translateY(0); } }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes breath { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.3); } }
+        /* 검색 및 정렬 툴바 */
+        .toolbar { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 10px; margin: 20px 0; }
+        .search-input { width: 260px; padding: 10px 16px; border-radius: 25px; margin: 0; }
+        .sort-select { padding: 10px 16px; border-radius: 25px; margin: 0; }
 
-        @media (max-width: 768px) {
-            .board { flex-direction: column; height: auto !important; overflow-y: visible; padding: 10px 0; }
-            .column { animation: none !important; width: 100%; }
-            .input-group { flex-wrap: wrap; }
-            select { max-width: none; }
-        }
+        /* 게시판 카드 화면 (긴 영문/기호 자동 줄바꿈 적용) */
+        .board-container { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin-top: 25px; }
+        .question-card { background: white; width: 295px; padding: 24px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); text-align: left; cursor: pointer; transition: 0.3s; border-left: 5px solid var(--main-green); display: flex; flex-direction: column; justify-content: space-between; position: relative; box-sizing: border-box; }
+        .question-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+        .teacher-badge { display: inline-block; background: #fff3e0; color: #e67e22; font-size: 12px; font-weight: bold; padding: 4px 10px; border-radius: 12px; margin-bottom: 8px; }
+        .card-title { font-size: 19px; font-weight: bold; color: #2c3e50; margin-bottom: 10px; line-height: 1.35; word-break: break-all; overflow-wrap: break-word; }
+        .card-content { font-size: 15px; color: #7f8c8d; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; line-height: 1.5; word-break: break-all; overflow-wrap: break-word; }
+        .card-footer { margin-top: 18px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: bold; border-top: 1px solid #f2f2f2; padding-top: 12px; }
+        .card-likes { color: #e74c3c; }
+        .card-comments { color: #3498db; }
+        
+        /* 팝업 모달 화면 */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: white; padding: 35px; border-radius: 20px; max-width: 600px; width: 90%; max-height: 82vh; overflow-y: auto; text-align: left; position: relative; box-sizing: border-box; }
+        .close-btn { position: absolute; top: 18px; right: 24px; font-size: 30px; cursor: pointer; color: #aaa; transition: 0.2s; }
+        .close-btn:hover { color: #333; }
+        .modal-title { font-size: 24px; font-weight: bold; margin-bottom: 16px; color: #2c3e50; padding-right: 25px; word-break: break-all; overflow-wrap: break-word; }
+        .modal-text { font-size: 17px; line-height: 1.65; color: #444; margin-bottom: 25px; white-space: pre-wrap; word-break: break-all; overflow-wrap: break-word; background: #fcfdfc; padding: 18px; border-radius: 12px; border: 1px solid #eef5ee; }
+        
+        /* 댓글 영역 (aaaa... 연속 문자 줄바꿈 완벽 적용) */
+        .comments-section { margin-top: 25px; border-top: 1px solid #eee; padding-top: 20px; }
+        .comment-item { background: #f9f9f9; padding: 14px; border-radius: 10px; margin-bottom: 10px; font-size: 15px; box-sizing: border-box; max-width: 100%; }
+        .comment-author { font-weight: bold; margin-bottom: 6px; }
+        .comment-text { white-space: pre-wrap; word-break: break-all; overflow-wrap: break-word; line-height: 1.5; color: #333; }
+        .role-selector { margin-top: 15px; margin-bottom: 5px; font-size: 14px; color: #555; }
+        .role-selector label { margin-right: 15px; cursor: pointer; }
+        .comment-input-area { display: flex; gap: 10px; margin-top: 10px; align-items: stretch; }
+        .comment-input-area textarea { flex: 1; margin: 0; border: 1px solid #ddd; padding: 12px; border-radius: 10px; height: 65px; max-width: none; word-break: break-all; overflow-wrap: break-word; }
+        .comment-input-area button { padding: 0 22px; font-size: 15px; margin: 0; border-radius: 12px; white-space: nowrap; }
     </style>
 </head>
 <body>
 
-<div id="loading">
-    <div class="seed-loader">🌱</div>
-    <p>질문 정원을 불러오는 중...</p>
-</div>
-
-<div class="container">
-    <h1 style="color: #2c3e50;">🌱 질문탐구노트_질문씨앗팀</h1>
-
-    <div id="step1" class="step active">
-        <h3>반갑습니다! 누구신가요?</h3>
-        <p style="color:#7f8c8d; font-size:14px; margin-top:-5px;">(학번은 중복 싹추 방지를 위해 수집되나, 게시판에는 익명 처리됩니다)</p>
-        <div class="input-group">
-            <select id="grade"><option value="">학년</option><script>for(let i=1;i<=3;i++) document.write(`<option value="${i}">${i}학년</option>`)</script></select>
-            <select id="class"><option value="">반</option><script>for(let i=1;i<=12;i++) document.write(`<option value="${i}">${i}반</option>`)</script></select>
-            <select id="num"><option value="">번호</option><script>for(let i=1;i<=30;i++) document.write(`<option value="${i}">${i}번</option>`)</script></select>
+    <!-- 1. 시작 학번 입력 화면 -->
+    <div id="intro-screen" class="container">
+        <div class="intro-box">
+            <h1>온라인 '질문탐구노트_질문씨앗팀🌱'</h1>
+            <p>당신의 호기심을 심어주세요!</p>
+            <div>
+                <select id="grade">
+                    <option value="">학년</option>
+                    <option value="1">1학년</option>
+                    <option value="2">2학년</option>
+                    <option value="3">3학년</option>
+                </select>
+                <select id="class">
+                    <option value="">반</option>
+                    <script>for(let i=1; i<=12; i++) document.write(`<option value="${i}">${i}반</option>`);</script>
+                </select>
+                <select id="num">
+                    <option value="">번호</option>
+                    <script>for(let i=1; i<=30; i++) document.write(`<option value="${i}">${i}번</option>`);</script>
+                </select>
+            </div>
+            <div style="margin-top: 15px;">
+                <button onclick="goToForm()">질문하기 ✍️</button>
+                <button class="secondary-btn" onclick="skipToBoard()">구경만 하기 👀</button>
+            </div>
+            <div style="margin-top: 18px; border-top: 1px solid #f0f0f0; padding-top: 15px;">
+                <a href="https://forms.gle/s2ZRWjNBSJ9kT9Ru9" target="_blank" rel="noopener noreferrer" class="link-btn inquiry-btn small-btn">📩 문의사항 / 건의하기</a>
+            </div>
         </div>
-        <button onclick="nextStep(2)">질문 씨앗 심기</button>
-        <br>
-        <button class="outline-btn" onclick="skipToBoard()">다른 친구들의 질문 보기</button>
     </div>
 
-    <div id="step2" class="step">
-        <div class="form-box">
-            <label style="font-weight: bold; color: #2c3e50;">큰 주제 (질문 제목)</label>
-            <input type="text" id="qTitle" placeholder="연구하고 싶은 핵심 질문을 적어주세요.">
-            <label style="font-weight: bold; color: #2c3e50;">상세 내용</label>
-            <textarea id="qContent" placeholder="질문에 대한 구체적인 배경이나 궁금한 점을 적어주세요."></textarea>
-            <button onclick="submitQuestion()" style="width: 100%;">질문 제출하기</button>
+    <!-- 2. 질문 작성 화면 -->
+    <div id="question-screen" class="container" style="display:none;">
+        <h1>새로운 씨앗 심기 🌱</h1>
+        <input type="text" id="q-title" placeholder="질문 제목을 입력하세요 (예: 왜 하늘은 파랄까?)" style="width: 100%; max-width: 500px; box-sizing: border-box;"><br>
+        <textarea id="q-content" placeholder="궁금한 내용을 자유롭게 적어주세요!"></textarea><br>
+        <button id="submitBtn" onclick="submitQuestion()">질문 제출하기 🚀</button>
+        <button class="secondary-btn" onclick="skipToBoard()">목록으로 돌아가기</button>
+    </div>
+
+    <!-- 3. 메인 게시판 화면 -->
+    <div id="board-screen" class="container" style="display:none;">
+        <div class="top-bar">
+            <div class="user-badge" id="user-badge-text">학번 정보 없음</div>
+            <div>
+                <a href="https://forms.gle/s2ZRWjNBSJ9kT9Ru9" target="_blank" rel="noopener noreferrer" class="link-btn inquiry-btn small-btn">📩 문의사항</a>
+                <button class="secondary-btn small-btn" onclick="changeUserInfo()">학번 변경</button>
+                <button class="secondary-btn small-btn" onclick="openAdminSeasonModal()">👑 시즌 관리</button>
+            </div>
+        </div>
+
+        <h1>모두의 질문 씨앗 🌱</h1>
+
+        <!-- 현재 시즌(질문목록_2) vs 지난 질문 보관함(질문목록) 전환 탭 -->
+        <div class="season-tabs">
+            <button id="tab-current" class="tab-btn active" onclick="switchMode('current')">🌱 현재 시즌 질문판</button>
+            <button id="tab-archive" class="tab-btn" onclick="switchMode('archive')">📚 지난 질문 보관함</button>
+        </div>
+
+        <div id="write-btn-area">
+            <button onclick="goToFormFromBoard()">+ 새 질문 심기</button>
+        </div>
+
+        <!-- 검색 및 정렬 바 -->
+        <div class="toolbar">
+            <input type="text" id="search-input" class="search-input" placeholder="🔍 질문 제목이나 내용 검색..." oninput="renderBoard()">
+            <select id="sort-select" class="sort-select" onchange="renderBoard()">
+                <option value="latest">최신순</option>
+                <option value="likes">❤️ 싹추 많은 순</option>
+                <option value="comments">💬 댓글 많은 순</option>
+            </select>
+            <button class="secondary-btn small-btn" onclick="fetchData()">🔄 새로고침</button>
+        </div>
+
+        <div id="board-container" class="board-container">
+            <p>씨앗을 불러오는 중입니다...🌱 (잠시만 기다려주세요)</p>
         </div>
     </div>
 
-    <div id="step3" class="step">
-        <h3>우리 팀의 질문 정원</h3>
-        <div class="board-header">
-            <p id="countInfo"></p>
-            <button id="toggleBtn" class="secondary-btn" onclick="toggleMyMode()">내 질문만 보기</button>
-        </div>
-        
-        <div class="board" id="board">
-            <div class="column" id="col1"></div>
-            <div class="column" id="col2"></div>
-            <div class="column" id="col3"></div>
-        </div>
-        <button onclick="nextStep(1)" style="margin-top: 30px; background: #95a5a6;">새 질문하기</button>
-    </div>
-</div>
+    <!-- 우측 하단 고정 문의하기 버튼 -->
+    <a href="https://forms.gle/s2ZRWjNBSJ9kT9Ru9" target="_blank" rel="noopener noreferrer" class="floating-inquiry">📩 문의사항 접수</a>
 
-<div id="modal">
-    <div class="modal-content">
-        <span class="close-btn" onclick="closeModal()">✖</span>
-        <h2 id="modalTitle" style="margin-top: 10px; color: #2ecc71;"></h2>
-        <hr style="border: 0; height: 1px; background: #eee; margin: 20px 0;">
-        <p id="modalBody" style="line-height: 1.6; color: #444; white-space: pre-wrap; font-size: 16px;"></p>
-        
-        <button id="modalLikeBtn" class="modal-like-btn" onclick="addLike()">🌱 싹추하기 (0)</button>
-    </div>
-</div>
-
-<script>
-    // 새로운 백엔드 주소 적용!
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzEucaAFr7mnhbE4lVl0ONyfUCP3NLGtRYHBm9V557SM7HqvIcLNiqtU_i-fy3Ys0oKbg/exec"; 
-    
-    let myInfo = {};
-    let allQuestions = []; 
-    let isMyMode = false; 
-    let currentQuestion = null; // 현재 열려있는 모달의 질문 데이터 임시 저장
-
-    function skipToBoard() {
-        myInfo = {}; 
-        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-        document.getElementById('step3').classList.add('active');
-        fetchQuestions();
-    }
-
-    function nextStep(n) {
-        if(n === 2) {
-            myInfo = { grade: document.getElementById('grade').value, class: document.getElementById('class').value, num: document.getElementById('num').value };
-            if(!myInfo.grade || !myInfo.class || !myInfo.num) return alert("정보를 모두 선택해주세요!");
-        }
-        if(n === 1) {
-            document.getElementById('grade').value = "";
-            document.getElementById('class').value = "";
-            document.getElementById('num').value = "";
-            myInfo = {};
-        }
-
-        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-        document.getElementById('step' + n).classList.add('active');
-        if(n === 3) fetchQuestions();
-    }
-
-    // 1. 질문 제출하기 (action: "addQuestion" 추가)
-    async function submitQuestion() {
-        const title = document.getElementById('qTitle').value;
-        const content = document.getElementById('qContent').value;
-        if(!title || !content) return alert("내용을 입력해주세요!");
-
-        const btn = document.querySelector('#step2 button');
-        btn.innerText = "심는 중...";
-        btn.disabled = true;
-
-        try {
-            await fetch(SCRIPT_URL, {
-                method: 'POST',
-                // 백엔드 요청에 맞게 action 파라미터 추가
-                body: JSON.stringify({ action: "addQuestion", ...myInfo, title, content })
-            });
-            document.getElementById('qTitle').value = "";
-            document.getElementById('qContent').value = "";
-            isMyMode = false; 
-            document.getElementById('toggleBtn').innerText = "내 질문만 보기";
+    <!-- 4. 질문 상세 및 댓글 모달 -->
+    <div id="modal" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="close-btn" onclick="closeModal(true)">&times;</span>
+            <div class="modal-title" id="m-title">제목</div>
+            <div class="modal-text" id="m-content">내용</div>
+            <div style="text-align: center;">
+                <button id="modalLikeBtn" onclick="addLike()">🌱 싹추하기 (0)</button>
+            </div>
             
-            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-            document.getElementById('step3').classList.add('active');
-            fetchQuestions();
+            <div class="comments-section">
+                <h3 id="comments-heading">💬 댓글</h3>
+                <div id="comments-container"></div>
 
-        } catch(e) {
-            alert("저장에 실패했습니다. 다시 시도해주세요.");
-        } finally {
-            btn.innerText = "질문 제출하기";
-            btn.disabled = false;
-        }
-    }
+                <div id="comment-write-box">
+                    <div class="role-selector">
+                        <label><input type="radio" name="roleType" value="student" checked onchange="toggleRoleInput()"> 학생 🎒</label>
+                        <label><input type="radio" name="roleType" value="teacher" onchange="toggleRoleInput()"> 선생님 🌱</label>
+                        <label><input type="radio" name="roleType" value="admin" onchange="toggleRoleInput()"> 관리자 👑</label>
+                    </div>
+                    
+                    <input type="password" id="role-password" placeholder="비밀번호를 입력하세요" style="display:none; width:100%; box-sizing:border-box; margin: 5px 0;">
 
-    function createCard(q) {
-        const card = document.createElement('div');
-        card.className = 'card';
-        // 카드 내부에 제목과 싹추 개수 배지 표시
-        card.innerHTML = `
-            <div class="title">${q.title}</div>
-            <div class="like-badge">🌱 ${q.likes}</div>
-        `;
-        card.onclick = () => openModal(q);
-        return card;
-    }
+                    <div class="comment-input-area">
+                        <textarea id="comment-input" placeholder="따뜻한 댓글이나 탐구 의견을 남겨주세요 💚 (줄바꿈 가능)"></textarea>
+                        <button id="commentBtn" onclick="submitComment()">등록</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    async function fetchQuestions() {
-        const loading = document.getElementById('loading');
-        loading.style.display = 'flex'; 
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx7zLJVLz99MjyoKs-2Jz3OTb7V5JMv1UPeso_B3O6iYQub0YXudvp5LosKBiKP2uSgJA/exec";
         
-        try {
-            const res = await fetch(SCRIPT_URL);
-            allQuestions = await res.json();
-            // 최신 글이 위로 오게 하고 싶다면 역순 정렬 (원치 않으시면 지워도 됩니다)
-            allQuestions.reverse(); 
-            renderBoard();
-        } catch(e) {
-            console.error("데이터 로딩 실패:", e);
-        } finally {
-            setTimeout(() => loading.style.display = 'none', 300);
-        }
-    }
+        let myInfo = { grade: '', class: '', num: '' };
+        let currentMode = 'current';
+        let allQuestions = [];
+        let allComments = [];
+        let currentQuestion = null;
 
-    function toggleMyMode() {
-        if(!myInfo.grade || !myInfo.class || !myInfo.num) {
-            alert("첫 화면에서 학번을 선택하지 않아 '내 질문'을 찾을 수 없습니다. '새 질문하기' 버튼을 눌러주세요.");
-            return;
-        }
-        isMyMode = !isMyMode;
-        const btn = document.getElementById('toggleBtn');
-        btn.innerText = isMyMode ? "전체 정원 보기" : "내 질문만 보기";
-        renderBoard();
-    }
-
-    function renderBoard() {
-        const isMobile = window.innerWidth <= 768; 
-        const cols = [document.getElementById('col1'), document.getElementById('col2'), document.getElementById('col3')];
-        const board = document.getElementById('board');
-        
-        cols.forEach(c => { c.innerHTML = ""; c.style.animation = ""; });
-        board.style.height = 'auto';
-
-        let displayData = allQuestions;
-        if (isMyMode) {
-            displayData = allQuestions.filter(q => 
-                q.grade == myInfo.grade && q.class == myInfo.class && q.num == myInfo.num
-            );
-        }
-
-        document.getElementById('countInfo').innerText = isMyMode 
-            ? `내가 심은 질문: ${displayData.length}개` 
-            : `익명으로 올라온 질문: ${displayData.length}개`;
-
-        if (displayData.length === 0) {
-            cols[1].innerHTML = `<div class="empty-msg">조건에 맞는 질문 씨앗이 아직 없습니다.</div>`;
-            return;
-        }
-
-        const colData = [[], [], []];
-        displayData.forEach((q, i) => colData[i % 3].push(q));
-
-        const shouldLoop = (!isMobile && !isMyMode && displayData.length >= 9);
-
-        cols.forEach((col, idx) => {
-            colData[idx].forEach(q => col.appendChild(createCard(q)));
+        window.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('seedUserInfo');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    if (parsed.grade && parsed.class && parsed.num) {
+                        myInfo = parsed;
+                        document.getElementById('grade').value = parsed.grade;
+                        document.getElementById('class').value = parsed.class;
+                        document.getElementById('num').value = parsed.num;
+                        updateUserBadge();
+                    }
+                } catch (e) {}
+            }
         });
 
-        setTimeout(() => {
-            if (shouldLoop) {
-                const minHeight = document.getElementById('col3').offsetHeight;
-                board.style.height = minHeight + "px"; 
-
-                cols.forEach((col, idx) => {
-                    colData[idx].forEach(q => col.appendChild(createCard(q)));
-                    const fullHeight = col.offsetHeight;
-                    const duration = fullHeight / 40; 
-                    if (idx === 1) col.style.animation = `floatDownUniform ${duration}s linear infinite`;
-                    else col.style.animation = `floatUpUniform ${duration}s linear infinite`;
-                });
-            } else {
-                board.style.height = 'auto'; 
-            }
-        }, 50);
-    }
-
-    // 모달창 띄우기
-    function openModal(q) {
-        currentQuestion = q; // 현재 선택된 질문 저장 (좋아요 기능에서 사용)
-        document.getElementById('modalTitle').innerText = q.title;
-        document.getElementById('modalBody').innerText = q.content;
-        
-        const likeBtn = document.getElementById('modalLikeBtn');
-        likeBtn.innerText = `🌱 싹추하기 (${q.likes})`;
-        
-        const modal = document.getElementById('modal');
-        modal.style.display = 'flex';
-        setTimeout(() => modal.classList.add('show'), 10); 
-    }
-
-    function closeModal() { 
-        const modal = document.getElementById('modal');
-        modal.classList.remove('show');
-        setTimeout(() => modal.style.display = 'none', 400); 
-    }
-
-    // 2. 싹추(좋아요) 기능 추가 (action: "addLike")
-    async function addLike() {
-        // 학번 없이 들어온 익명 유저 방어
-        if(!myInfo.grade || !myInfo.class || !myInfo.num) {
-            alert("싹추를 주려면 학번 정보가 필요합니다! 🌱\n아래 '새 질문하기' 버튼을 눌러 학번을 등록해주세요.");
-            return;
+        function escapeHTML(str) {
+            if(!str) return '';
+            return String(str).replace(/[&<>'"]/g, tag => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+            }[tag] || tag));
         }
 
-        const btn = document.getElementById('modalLikeBtn');
-        btn.innerText = "🌱 물 주는 중...";
-        btn.disabled = true;
+        function updateUserBadge() {
+            const badge = document.getElementById('user-badge-text');
+            if (myInfo.grade && myInfo.class && myInfo.num) {
+                badge.innerText = `🎒 내 학번: ${myInfo.grade}학년 ${myInfo.class}반 ${myInfo.num}번`;
+            } else {
+                badge.innerText = `학번 미입력`;
+            }
+        }
 
-        try {
-            const res = await fetch(SCRIPT_URL, {
-                method: 'POST',
-                body: JSON.stringify({ 
-                    action: "addLike", 
-                    questionId: currentQuestion.id,
-                    userGrade: myInfo.grade,
-                    userClass: myInfo.class,
-                    userNum: myInfo.num
-                })
+        function checkMyInfo() {
+            const g = document.getElementById('grade').value;
+            const c = document.getElementById('class').value;
+            const n = document.getElementById('num').value;
+            
+            if (!g || !c || !n) {
+                alert("구경만 하더라도 학번, 반, 번호를 꼭 선택해주세요! 나중에 싹추나 댓글을 달 때 필요해요 🌱");
+                return false;
+            }
+            myInfo = { grade: g, class: c, num: n };
+            localStorage.setItem('seedUserInfo', JSON.stringify(myInfo));
+            updateUserBadge();
+            return true;
+        }
+
+        function changeUserInfo() {
+            document.getElementById('board-screen').style.display = 'none';
+            document.getElementById('question-screen').style.display = 'none';
+            document.getElementById('intro-screen').style.display = 'block';
+        }
+
+        function goToForm() {
+            if (!checkMyInfo()) return;
+            document.getElementById('intro-screen').style.display = 'none';
+            document.getElementById('board-screen').style.display = 'none';
+            document.getElementById('question-screen').style.display = 'block';
+        }
+        
+        function goToFormFromBoard() {
+            if (!myInfo.grade) {
+                alert("질문을 하려면 먼저 학번을 입력해야 합니다!");
+                changeUserInfo();
+                return;
+            }
+            document.getElementById('intro-screen').style.display = 'none';
+            document.getElementById('board-screen').style.display = 'none';
+            document.getElementById('question-screen').style.display = 'block';
+        }
+
+        function skipToBoard() {
+            if (!checkMyInfo()) return;
+            document.getElementById('intro-screen').style.display = 'none';
+            document.getElementById('question-screen').style.display = 'none';
+            document.getElementById('board-screen').style.display = 'block';
+            fetchData();
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            document.getElementById('tab-current').classList.toggle('active', mode === 'current');
+            document.getElementById('tab-archive').classList.toggle('active', mode === 'archive');
+            document.getElementById('write-btn-area').style.display = (mode === 'current') ? 'block' : 'none';
+            fetchData();
+        }
+
+        async function fetchData() {
+            const container = document.getElementById('board-container');
+            container.innerHTML = "<p>씨앗을 싹틔우는 중... 🌱 (잠시만 기다려주세요)</p>";
+            
+            try {
+                const url = currentMode === 'archive' ? `${SCRIPT_URL}?mode=archive` : SCRIPT_URL;
+                const res = await fetch(url);
+                const data = await res.json();
+                
+                if(Array.isArray(data)) {
+                    allQuestions = data;
+                    allComments = [];
+                } else {
+                    allQuestions = data.questions || [];
+                    allComments = data.comments || [];
+                }
+                
+                allQuestions.reverse();
+                renderBoard();
+            } catch (e) {
+                container.innerHTML = "<p>데이터를 불러오는데 실패했습니다. 새로고침 해주세요.</p>";
+            }
+        }
+
+        function renderBoard() {
+            const container = document.getElementById('board-container');
+            container.innerHTML = '';
+            
+            const keyword = (document.getElementById('search-input').value || '').trim().toLowerCase();
+            const sortBy = document.getElementById('sort-select').value;
+
+            let filtered = allQuestions.filter(q => {
+                if (!keyword) return true;
+                const t = String(q.title || '').toLowerCase();
+                const c = String(q.content || '').toLowerCase();
+                return t.includes(keyword) || c.includes(keyword);
             });
-            
-            const result = await res.text();
-            
-            if (result === "Already Liked") {
-                alert("이미 이 질문에 싹추를 주셨습니다! 😅");
-            } else if (result === "Like Success") {
-                // 성공 시 화면의 숫자를 1 올리고 다시 렌더링
-                currentQuestion.likes = Number(currentQuestion.likes) + 1;
-                btn.innerText = `🌱 싹추하기 (${currentQuestion.likes})`;
-                renderBoard(); // 뒤 배경의 카드 싹추 숫자도 업데이트 되도록 새로고침
-                alert("싹추 성공! 질문이 무럭무럭 자랄 거예요 🌱");
-            } else {
-                alert("알 수 없는 오류가 발생했습니다.");
+
+            filtered.forEach(q => {
+                const qComments = allComments.filter(c => String(c.questionId) === String(q.id));
+                q._commentCount = qComments.length;
+                q._hasTeacher = qComments.some(c => String(c.grade).includes("선생님"));
+            });
+
+            if (sortBy === 'likes') {
+                filtered.sort((a, b) => (Number(b.likes) || 0) - (Number(a.likes) || 0));
+            } else if (sortBy === 'comments') {
+                filtered.sort((a, b) => (b._commentCount || 0) - (a._commentCount || 0));
             }
-        } catch(e) {
-            alert("서버 연결에 실패했습니다.");
-        } finally {
-            btn.disabled = false;
-            btn.innerText = `🌱 싹추하기 (${currentQuestion.likes})`;
+
+            if(filtered.length === 0) {
+                container.innerHTML = keyword 
+                    ? "<p>검색 결과가 없습니다. 다른 키워드로 검색해보세요! 🔍</p>"
+                    : "<p>아직 심어진 질문이 없습니다. 첫 번째 씨앗을 심어보세요! 🌱</p>";
+                return;
+            }
+
+            filtered.forEach(q => {
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.onclick = () => openModal(q);
+                
+                const safeLikes = Number(q.likes) || 0;
+                const teacherBadgeHTML = q._hasTeacher ? `<div class="teacher-badge">선생님 답변 🌱</div>` : '';
+                
+                card.innerHTML = `
+                    <div>
+                        ${teacherBadgeHTML}
+                        <div class="card-title">${escapeHTML(q.title)}</div>
+                        <div class="card-content">${escapeHTML(q.content)}</div>
+                    </div>
+                    <div class="card-footer">
+                        <span class="card-likes">❤️ 싹추 ${safeLikes}</span>
+                        <span class="card-comments">💬 댓글 ${q._commentCount}</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
         }
-    }
-</script>
+
+        async function submitQuestion() {
+            const title = document.getElementById('q-title').value.trim();
+            const content = document.getElementById('q-content').value.trim();
+            const btn = document.getElementById('submitBtn');
+            
+            if(!title || !content) {
+                alert("제목과 내용을 모두 입력해주세요!");
+                return;
+            }
+            
+            btn.innerText = "제출 중... 🚀";
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ 
+                        action: "addQuestion", 
+                        userGrade: myInfo.grade, 
+                        userClass: myInfo.class, 
+                        userNum: myInfo.num, 
+                        title: title, 
+                        content: content 
+                    })
+                });
+                
+                const result = await res.text();
+                
+                if (result.includes("Success") || result.includes("sucess")) {
+                    alert("질문이 성공적으로 심어졌습니다! 🌱");
+                    document.getElementById('q-title').value = '';
+                    document.getElementById('q-content').value = '';
+                    
+                    document.getElementById('question-screen').style.display = 'none';
+                    document.getElementById('board-screen').style.display = 'block';
+                    fetchData(); 
+                } else {
+                    alert("저장에 실패했습니다: " + result);
+                }
+            } catch(e) {
+                alert("서버 연결에 실패했습니다.");
+            } finally {
+                btn.innerText = "질문 제출하기 🚀";
+                btn.disabled = false;
+            }
+        }
+
+        function openModal(q) {
+            currentQuestion = q;
+            document.getElementById('m-title').innerText = q.title;
+            document.getElementById('m-content').innerText = q.content;
+            
+            const safeLikes = Number(q.likes) || 0;
+            const likeBtn = document.getElementById('modalLikeBtn');
+            likeBtn.innerText = `🌱 싹추하기 (${safeLikes})`;
+            
+            const isArchive = (currentMode === 'archive');
+            likeBtn.disabled = isArchive;
+            document.getElementById('comment-write-box').style.display = isArchive ? 'none' : 'block';
+            
+            document.querySelector('input[value="student"]').checked = true;
+            toggleRoleInput();
+            document.getElementById('comment-input').value = '';
+
+            renderComments(); 
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        function closeModal(force = false) {
+            if(force || event.target === document.getElementById('modal')) {
+                document.getElementById('modal').style.display = 'none';
+            }
+        }
+
+        async function addLike() {
+            if (!myInfo.grade || !myInfo.class || !myInfo.num) {
+                alert("싹추를 주려면 학번 정보가 필요합니다! 🌱");
+                return;
+            }
+
+            const btn = document.getElementById('modalLikeBtn');
+            btn.innerText = "🌱 물 주는 중...";
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ 
+                        action: "addLike", 
+                        questionId: currentQuestion.id,
+                        userGrade: myInfo.grade,
+                        userClass: myInfo.class,
+                        userNum: myInfo.num
+                    })
+                });
+                
+                const result = await res.text();
+                
+                if (result === "Already Liked") {
+                    alert("이미 이 질문에 싹추를 주셨습니다! 😅");
+                    btn.innerText = `🌱 싹추하기 (${currentQuestion.likes})`;
+                } else if (result.includes("Success")) {
+                    currentQuestion.likes = Number(currentQuestion.likes || 0) + 1;
+                    btn.innerText = `🌱 싹추하기 (${currentQuestion.likes})`;
+                    alert("싹추 성공! 질문이 무럭무럭 자랄 거예요 🌱");
+                    renderBoard(); 
+                } else {
+                    alert("오류가 발생했습니다: " + result);
+                    btn.innerText = `🌱 싹추하기 (${currentQuestion.likes})`;
+                    btn.disabled = false;
+                }
+            } catch(e) {
+                alert("서버 연결에 실패했습니다.");
+                btn.innerText = `🌱 싹추하기 (${currentQuestion.likes})`;
+                btn.disabled = false;
+            }
+        }
+
+        function toggleRoleInput() {
+            const roleType = document.querySelector('input[name="roleType"]:checked').value;
+            const pwdInput = document.getElementById('role-password');
+            if(roleType === 'student') {
+                pwdInput.style.display = 'none';
+                pwdInput.value = '';
+            } else {
+                pwdInput.style.display = 'block';
+            }
+        }
+
+        async function submitComment() {
+            const cInput = document.getElementById('comment-input');
+            const commentText = cInput.value.trim();
+            const btn = document.getElementById('commentBtn');
+            const roleType = document.querySelector('input[name="roleType"]:checked').value;
+            const roleKey = document.getElementById('role-password').value;
+
+            if (roleType === 'student' && (!myInfo.grade || !myInfo.class || !myInfo.num)) {
+                alert("댓글을 달려면 학번 정보가 필요합니다! 🌱");
+                return;
+            }
+            if(roleType !== 'student' && !roleKey) {
+                alert("비밀번호를 입력해주세요!");
+                return;
+            }
+            if(!commentText) {
+                alert("댓글 내용을 입력해주세요!");
+                return;
+            }
+
+            btn.innerText = "등록 중...";
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ 
+                        action: "addComment", 
+                        questionId: currentQuestion.id,
+                        userGrade: myInfo.grade,
+                        userClass: myInfo.class,
+                        userNum: myInfo.num,
+                        comment: commentText,
+                        roleType: roleType,
+                        roleKey: roleKey
+                    })
+                });
+                
+                const result = await res.text();
+                
+                if (result === "Unauthorized") {
+                    alert("비밀번호가 틀렸습니다! 😅 다시 확인해주세요.");
+                } else if (result.includes("Success")) {
+                    let displayGrade = myInfo.grade;
+                    if(roleType === 'teacher') displayGrade = "선생님 🌱";
+                    if(roleType === 'admin') displayGrade = "관리자 👑";
+
+                    allComments.push({
+                        questionId: currentQuestion.id,
+                        grade: displayGrade,
+                        class: myInfo.class,
+                        num: myInfo.num,
+                        comment: commentText
+                    });
+                    cInput.value = '';
+                    document.getElementById('role-password').value = '';
+                    renderComments();
+                    renderBoard();
+                } else {
+                    alert("댓글 저장에 실패했습니다: " + result);
+                }
+            } catch(e) {
+                alert("서버 연결에 실패했습니다.");
+            } finally {
+                btn.innerText = "등록";
+                btn.disabled = false;
+            }
+        }
+
+        function renderComments() {
+            const container = document.getElementById('comments-container');
+            container.innerHTML = '';
+            
+            const qComments = allComments.filter(c => String(c.questionId) === String(currentQuestion.id));
+            document.getElementById('comments-heading').innerText = `💬 댓글 (${qComments.length})`;
+            
+            if(qComments.length === 0) {
+                container.innerHTML = "<p style='color:#999; text-align:center;'>아직 댓글이 없습니다. 첫 댓글을 남겨보세요!</p>";
+                return;
+            }
+            
+            qComments.forEach(c => {
+                const div = document.createElement('div');
+                div.className = 'comment-item';
+                
+                let authorHTML = `<div class="comment-author" style="color: var(--main-green);">익명 🌱</div>`;
+                
+                if(String(c.grade).includes("선생님")) {
+                    authorHTML = `<div class="comment-author" style="color: #e67e22;">선생님 🌱</div>`;
+                } else if(String(c.grade).includes("관리자")) {
+                    authorHTML = `<div class="comment-author" style="color: #9b59b6;">관리자 👑</div>`;
+                }
+                
+                div.innerHTML = `
+                    ${authorHTML}
+                    <div class="comment-text">${escapeHTML(c.comment)}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        async function openAdminSeasonModal() {
+            const newSheetName = prompt("새로 시작할 질문 시트(탭) 이름을 입력하세요.\n(예: 질문목록_3, 2학기_질문목록 등)\n* 이미 있는 탭 이름을 입력하면 해당 탭으로 전환됩니다.");
+            if (!newSheetName) return;
+
+            const adminKey = prompt("관리자 비밀번호를 입력하세요:");
+            if (!adminKey) return;
+
+            try {
+                const res = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: "startNewSeason",
+                        newSheetName: newSheetName.trim(),
+                        adminKey: adminKey
+                    })
+                });
+                const result = await res.text();
+                if (result === "Unauthorized") {
+                    alert("관리자 비밀번호가 올바르지 않습니다.");
+                } else if (result.includes("Season Changed")) {
+                    alert(`성공적으로 [${newSheetName}] 시트로 전환되었습니다! 🌱`);
+                    switchMode('current');
+                } else {
+                    alert("전환 실패: " + result);
+                }
+            } catch (e) {
+                alert("서버 통신 중 오류가 발생했습니다.");
+            }
+        }
+    </script>
 </body>
 </html>
